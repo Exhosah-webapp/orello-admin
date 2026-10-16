@@ -143,7 +143,7 @@
   const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)))].map(b => b.toString(16).padStart(2, '0')).join('');
   const base = () => location.protocol === 'file:' ? location.href.split(/[?#]/)[0] : location.origin + location.pathname;
   const store = { get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) {} } };
-  const LINK_NOTE = 'Orello does not send emails itself. "Send link" opens your email app with the message ready to go. You can also copy the link and send it yourself. A link only works for the email address it was created for, and expires after 7 days.';
+  const LINK_NOTE = 'Each person is emailed their link automatically. If an email does not arrive, use "Send link" to send it from your own email app, or copy the link. A link only works for the email address it was created for, and expires after 7 days.';
   const EMPTY = 'No sessions recorded yet. Sessions appear here when team members track time in the plugin.';
   const P = {
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -172,7 +172,7 @@
   }
   function linksHtml(ls) {
     return ls.map(r => r.error ? '<div class="res bad">' + esc(r.email) + ': ' + esc(r.error) + '</div>'
-      : '<div class="res">' + esc(r.email) + '<div class="linkrow"><input readonly value="' + esc(r.link) + '" aria-label="Invitation link for ' + esc(r.email) + '"><button type="button" data-copy>Copy link</button></div>' +
+      : '<div class="res">' + esc(r.email) + (r.emailed ? '<p class="msg">Email sent.</p>' : '<p class="msg error">The email was not sent: ' + esc(r.mailError) + ' Use Send link or Copy link instead.</p>') + '<div class="linkrow"><input readonly value="' + esc(r.link) + '" aria-label="Invitation link for ' + esc(r.email) + '"><button type="button" data-copy>Copy link</button></div>' +
         '<a class="btn" href="' + esc(mailto(r)) + '">Send link</a></div>').join('');
   }
 
@@ -193,7 +193,7 @@
       '<button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Creating...' : 'Continue') + '</button></form><p class="help" style="margin-top:14px">Joining someone else\'s team? Open the invitation link they sent you again.</p><button class="link" data-ob="signout">Sign out</button>');
     else if (o.step === 'invite') h = wrap('Invite your teammates', 'Add your teammates to start tracking productivity and collaborating seamlessly', '',
       o.links ? '<p class="help">' + LINK_NOTE + '</p>' + linksHtml(o.links) + '<button class="primary" data-ob="dash" style="margin-top:20px">Go to dashboard</button>'
-        : '<form data-s="invite"><label for="emails">Email teammates</label><textarea id="emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea><button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Creating links...' : 'Send invites') + '</button></form><button class="link" data-ob="dash">Skip for now</button>');
+        : '<form data-s="invite"><label for="emails">Email teammates</label><textarea id="emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea><button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Sending...' : 'Send invites') + '</button></form><button class="link" data-ob="dash">Skip for now</button>');
     else if (o.step === 'notice') h = wrap(esc(o.title), esc(o.notice), '', '<button class="link" data-ob="signin">Sign in</button> <button class="link" data-ob="signout">Sign out</button>');
     else h = wrap(joining ? 'Join a team' : 'Create an account', joining ? 'Create your account to accept the invitation' : 'Specifically tailored for design teams',
       joining ? 'Use the email address your invitation was sent to.' : 'Use an organizational email or your Figma email to track your team members.',
@@ -278,8 +278,13 @@
     const out = [];
     for (const email of emails) {
       const t = rand();
-      const { error } = await db.from('project_invitations').insert({ team_id: team.id, email, role: 'member', invited_by: me.id, token_hash: await sha(t) });
-      out.push(error ? { email, error: error.message } : { email, link: base() + '?invite=' + t });
+      const { data, error } = await db.from('project_invitations').insert({ team_id: team.id, email, role: 'member', invited_by: me.id, token_hash: await sha(t) }).select('id').single();
+      if (error) { out.push({ email, error: error.message }); continue; }
+      const r = { email, link: base() + '?invite=' + t };
+      // The send-invite Edge Function emails the link (it checks that this admin owns the invitation).
+      const { error: mailErr } = await db.functions.invoke('send-invite', { body: { invitationId: data.id, token: t } });
+      if (mailErr) { let m = ''; try { m = (await mailErr.context.json()).error || ''; } catch (_) {} r.mailError = m || mailErr.message; } else r.emailed = true;
+      out.push(r);
     }
     return out;
   }
@@ -362,7 +367,7 @@
     return head('users', 'Team Overview') + '<h2>' + esc(team.name) + ' members</h2>' +
       table(['Name', 'Role', 'Joined'], members.map(m => '<tr><td>' + esc(nm(m.user_id)) + '</td><td>' + esc(m.role) + '</td><td>' + fmt(m.joined_at) + '</td></tr>'), 'No members yet.') +
       '<h2>Invite teammates</h2><div class="card"><form id="inv-form"><label for="inv-emails">Teammate emails</label><textarea id="inv-emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea>' +
-      '<button class="primary" type="submit"' + (dashBusy ? ' disabled' : '') + '>' + (dashBusy ? 'Creating links...' : 'Create invitation links') + '</button></form>' +
+      '<button class="primary" type="submit"' + (dashBusy ? ' disabled' : '') + '>' + (dashBusy ? 'Sending...' : 'Send invites') + '</button></form>' +
       (dashErr ? '<p class="msg error" role="alert">' + esc(dashErr) + '</p>' : '') + '<p class="muted">' + LINK_NOTE + '</p>' + (dashLinks ? linksHtml(dashLinks) : '') + '</div>' +
       '<h2>Invitations</h2>' + table(['Email', 'Role', 'Sent', 'Expires', 'Status'], invs.map(i => '<tr><td>' + esc(i.email) + '</td><td>' + esc(i.role) + '</td><td>' + fmt(i.created_at) + '</td><td>' + fmt(i.expires_at) + '</td><td>' + st(i) + '</td></tr>'), 'No invitations yet.');
   }
