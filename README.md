@@ -1,24 +1,23 @@
-# Orello split project
+# Orello Admin
 
-This folder contains the original Orello pages with their embedded CSS and JavaScript split into separate files.
+This package is **only the Orello Admin web interface**. It intentionally excludes `ui.html` and the tracker/plugin assets. Those belong to the separate plugin interface and are not required by Admin.
 
-## Structure
+## Files
 
-- `admin.html` — admin page
-- `ui.html` — tracker page
-- `css/admin.css` — admin page styles
-- `css/ui.css` — tracker page styles
-- `js/admin.js` — admin page application logic
-- `js/ui.js` — tracker page application logic
-- `js/ui-supabase.js` — bundled Supabase client used by the tracker page
+- `admin.html` — Admin page and authentication entry point
+- `css/admin.css` — Admin styles
+- `js/admin.js` — Admin logic and Supabase calls
+- `vercel.json` — Vercel routes `/` and `/admin` to `admin.html`
+- `DEPLOYMENT.md` — Vercel and Supabase setup notes
 
-## Run it
+## Run locally
 
-For a static local preview, open `ui.html` or `admin.html` in a browser. If authentication, database requests, or browser security rules prevent local-file operation, serve this folder using a local development server (for example, VS Code Live Server).
+Open this folder in VS Code and use Live Server or another local HTTP server. The Admin page uses the Supabase JavaScript CDN client directly; it does not load the plugin's `ui.html`, `ui.js`, or bundled `ui-supabase.js`.
 
-## Notes
+## Scope
 
-- The existing Supabase CDN script on `admin.html` is preserved.
-- Script order is preserved by placing the scripts at the original script positions and using `defer`.
-- The supplied project contains JavaScript, not TypeScript source. No `.ts` file was added because TypeScript needs compilation or a build setup; converting the current JavaScript to TypeScript without checking its data shapes and APIs could introduce errors.
-- The existing Supabase URL and publishable key are preserved as supplied. Never put a Supabase service-role key in browser code.
+The Admin page retains the existing authentication and Supabase operations. The plugin/tracker interface should be deployed and maintained separately if it needs its own URL or hosting configuration.
+
+## Security
+
+The browser uses a Supabase publishable key. Never place a Supabase service-role key or server secret in HTML/JavaScript. Supabase Row Level Security must enforce access controls.
