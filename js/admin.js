@@ -49,7 +49,7 @@
   function renderAuth() {
     const o = ob, dis = o.busy ? ' disabled' : '', joining = !!pending();
     const err = o.err ? '<p class="msg error" role="alert">' + esc(o.err) + '</p>' : '';
-    const wrap = (t, sub, help, inner) => '<h1>' + t + '</h1><div class="sub">' + sub + '</div>' + (help ? '<p class="help">' + help + '</p>' : '') + inner + err;
+    const wrap = (t, sub, help, inner) => '<div class="auth-header"><a class="auth-logo" href="/" aria-label="Orello home">Orello<span>.</span></a><label class="language-picker"><span aria-hidden="true">🇬🇧</span><select aria-label="Language"><option>English</option></select><span class="chevron">⌄</span></label></div><div class="auth-content"><h1>' + t + '</h1><div class="sub">' + sub + '</div>' + (help ? '<p class="help">' + help + '</p>' : '') + inner + err + '</div>';
     const field = (id, label, type, ph, val, extra) => '<label for="' + id + '">' + label + '</label><input id="' + id + '" name="' + id + '" type="' + type + '" placeholder="' + ph + '" value="' + esc(val) + '" ' + (extra || '') + '>';
     let h;
     if (o.step === 'name') h = wrap('Getting started', 'Track productivity, enhance collaboration', 'Your team members will see your name.',
@@ -65,10 +65,11 @@
       o.links ? '<p class="help">' + LINK_NOTE + '</p>' + linksHtml(o.links) + '<button class="primary" data-ob="dash" style="margin-top:20px">Go to dashboard</button>'
         : '<form data-s="invite"><label for="emails">Email teammates</label><textarea id="emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea><button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Sending...' : 'Send invites') + '</button></form><button class="link" data-ob="dash">Skip for now</button>');
     else if (o.step === 'notice') h = wrap(esc(o.title), esc(o.notice), '', '<button class="link" data-ob="signin">Sign in</button> <button class="link" data-ob="signout">Sign out</button>');
+    else if (o.step === 'password') h = wrap('Create a password', 'Keep your Orello account secure', 'Use at least 6 characters.',
+      '<form data-s="password">' + field('password', 'Password', 'password', 'Create a password', '', 'required minlength="6" autocomplete="new-password"') + '<button class="primary" type="submit">Continue</button><button class="link back-link" type="button" data-ob="email">Back</button></form>');
     else h = wrap(joining ? 'Join a team' : 'Create an account', joining ? 'Create your account to accept the invitation' : 'Specifically tailored for design teams',
       joining ? 'Use the email address your invitation was sent to.' : 'Use an organizational email or your Figma email to track your team members.',
-      '<form data-s="email">' + field('email', 'Email', 'email', 'Enter your organizational email', o.email, 'required autocomplete="email"') + field('password', 'Password', 'password', 'At least 6 characters', '', 'required minlength="6" autocomplete="new-password"') +
-      '<button class="primary" type="submit">Continue</button></form><div class="toggle">Already have an account? <button data-ob="signin">Sign in</button></div>');
+      (!joining ? '<div class="social-auth"><button type="button" data-oauth="google"><span class="google-g">G</span>Continue with Google</button><button type="button" data-oauth="apple"><span class="apple-mark">●</span>Continue with Apple</button></div>' : '') + '<form data-s="email"><label for="email">Email</label>' + field('email', '', 'email', 'Enter your organizational email', o.email, 'required autocomplete="email"') + '<label for="password">Password</label>' + field('password', '', 'password', 'Create a password (at least 6 characters)', '', 'required minlength="6" autocomplete="new-password"') + '<button class="primary" type="submit">Create account</button></form><p class="legal"><a href="#terms">Terms &amp; Condition</a> and <a href="#privacy">Privacy policy</a></p><div class="toggle">Already have an account? <button data-ob="signin">Sign in</button></div>');
     $('auth').innerHTML = h;
   }
 
@@ -78,10 +79,11 @@
     const v = n => f.elements[n]?.value ?? '';
     ob.err = '';
     switch (f.dataset.s) {
-      case 'email': { const em = v('email').trim().toLowerCase();
+      case 'email': { const em = v('email').trim().toLowerCase(), pw = v('password');
         if (!EMAIL_RE.test(em)) ob.err = 'Enter a valid email address.';
-        else if (v('password').length < 6) ob.err = 'Use a password of at least 6 characters.';
-        else { ob.email = em; ob.password = v('password'); ob.step = 'name'; } break; }
+        else if (pw.length < 6) ob.err = 'Use a password of at least 6 characters.';
+        else { ob.email = em; ob.password = pw; ob.step = 'name'; } break; }
+      case 'password': if (v('password').length < 6) ob.err = 'Use a password of at least 6 characters.'; else { ob.password = v('password'); ob.step = 'name'; } break;
       case 'name': ob.name = v('name').trim(); await signUp(); return;
       case 'signin': ob.email = v('email').trim().toLowerCase(); await signIn(ob.email, v('password')); return;
       case 'workspace': ob.ws = v('ws').trim(); if (!ob.ws) ob.err = 'Enter a workspace name.'; else { await makeTeam(); return; } break;
@@ -91,6 +93,8 @@
   });
 
   $('auth').addEventListener('click', async e => {
+    const oauth = e.target.closest('[data-oauth]');
+    if (oauth) { const { error } = await db.auth.signInWithOAuth({ provider: oauth.dataset.oauth, options: { redirectTo: base() } }); if (error) { ob.err = error.message; renderAuth(); } return; }
     const p = e.target.closest('[data-purpose]');
     if (p) { const w = $('auth').querySelector('[name=ws]'); if (w) ob.ws = w.value; ob.purpose = p.dataset.purpose; renderAuth(); return; }
     const b = e.target.closest('[data-ob]'); if (!b) return;
