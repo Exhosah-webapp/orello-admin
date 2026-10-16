@@ -579,3 +579,193 @@ main label { display: block; margin-bottom: 7px; color: var(--ink-soft); font-si
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* Restore Orello's original navy / blue / yellow auth experience.
+   These overrides are deliberately scoped to login and account setup only. */
+#auth.flow {
+  --ink: #1d3557;
+  --ink-soft: #1d3557;
+  --muted: #718096;
+  --muted-strong: #718096;
+  --line: #dfe6f0;
+  --line-strong: #c9ced6;
+  --surface: #ffffff;
+  --canvas: #ffffff;
+  --canvas-tint: #eef3fb;
+  --navy: #1d3557;
+  --blue: #4a90d9;
+  --blue-deep: #2f6db5;
+  --blue-bg: #eef3fb;
+  --blue-tx: #2f6db5;
+  --yellow: #fdd23a;
+  --yellow-bg: #fff3c4;
+  --yellow-tx: #8a6d00;
+  --red: #b42318;
+  min-height: 0;
+  width: auto;
+  max-width: 420px;
+  margin: 4vh auto;
+  padding: 0 20px !important;
+  display: block;
+  align-self: auto;
+  justify-self: auto;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+#auth.flow::before { display: none; }
+#auth.flow h1 {
+  display: block;
+  margin: 0;
+  color: #9a9a9a;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+#auth.flow .sub {
+  margin: 4px 0 28px;
+  color: #1a1a1a;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+#auth.flow .help {
+  margin: 0 0 16px;
+  color: #718096;
+  font-size: 13px;
+  line-height: 1.5;
+}
+#auth.flow label {
+  margin: 0 0 7px;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 600;
+}
+#auth.flow input, #auth.flow select, #auth.flow textarea {
+  min-height: 0;
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid #c9ced6;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d3557;
+  font-size: 13px;
+  box-shadow: none;
+}
+#auth.flow input:focus, #auth.flow select:focus, #auth.flow textarea:focus {
+  border-color: #4a90d9;
+  box-shadow: 0 0 0 2px rgb(74 144 217 / 14%);
+}
+#auth.flow .primary {
+  width: 100%;
+  min-height: 0;
+  margin-top: 0;
+  padding: 14px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #1d3557;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+#auth.flow .primary:hover:not(:disabled) {
+  background: #28466f;
+  box-shadow: none;
+  transform: none;
+}
+#auth.flow .link, #auth.flow .toggle button, #auth.flow .inline {
+  color: #2f6db5;
+  background: transparent;
+  font-weight: 600;
+}
+#auth.flow .toggle {
+  margin-top: 10px;
+  padding-top: 0;
+  border-top: 0;
+  color: #718096;
+  font-size: 13px;
+}
+#auth.flow .chips { gap: 8px; margin-bottom: 18px; }
+#auth.flow .chips button {
+  min-height: 0;
+  padding: 10px;
+  border: 1px solid #c9ced6;
+  border-radius: 8px;
+  color: #718096;
+  background: #fff;
+  box-shadow: none;
+}
+#auth.flow .chips button[aria-pressed="true"] {
+  border-color: #1d3557;
+  color: #1d3557;
+  background: #eef3fb;
+  box-shadow: none;
+}
+#auth.flow .msg { color: #718096; }
+#auth.flow .msg.error { color: #b42318; }
+@media (max-width: 420px) {
+  #auth.flow { margin: 4vh auto; padding: 0 20px !important; }
+}
+html:has(#auth:not([hidden])),
+body:has(#auth:not([hidden])) { background: #fff; }
+
+/* Compact, responsive Orello authentication UI based on the approved reference. */
+#auth.flow {
+  position: relative; display: block; width: 100%; max-width: none; min-height: 100vh;
+  margin: 0; padding: 0 clamp(20px, 5.6vw, 80px) 36px !important;
+  background: #fff; color: #202020;
+}
+#auth.flow .auth-header {
+  width: 100%; height: clamp(70px, 10vh, 96px); display: flex; align-items: flex-start;
+  justify-content: space-between; padding-top: clamp(20px, 3vh, 30px);
+}
+#auth.flow .auth-logo {
+  color: #1d3557; text-decoration: none; font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 2.2vw, 32px); font-weight: 700; line-height: 1; letter-spacing: -1.5px;
+}
+#auth.flow .auth-logo span { color: #9dd9dc; }
+#auth.flow .language-picker { display:flex; align-items:center; gap:4px; margin:4px 0 0; color:#1d3557; font-size:14px; }
+#auth.flow .language-picker select { width:auto; min-height:0; margin:0; padding:0; border:0; color:#1d3557; font-size:14px; appearance:none; background:transparent; cursor:pointer; }
+#auth.flow .language-picker .chevron { color:#333; font-size:17px; margin-left:1px; }
+#auth.flow .auth-content { width:min(100%, 360px); margin:clamp(20px, 7vh, 62px) auto 0; }
+#auth.flow h1 { margin:0; color:#9b9b9b; font-size:clamp(25px, 2.1vw, 29px); font-weight:650; letter-spacing:-.4px; line-height:1.22; }
+#auth.flow .sub { margin:6px 0 26px; color:#222; font-size:clamp(16px, 1.35vw, 19px); font-weight:500; line-height:1.3; }
+#auth.flow .help { margin:0 0 16px; color:#808080; font-size:15px; font-weight:400; line-height:1.4; }
+#auth.flow .social-auth { display:grid; gap:10px; margin:0 0 22px; }
+#auth.flow .social-auth button { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:44px; padding:9px 14px; border:1px solid #b8b8b8; border-radius:7px; color:#222; background:#fff; font-size:15px; font-weight:600; box-shadow:none; }
+#auth.flow .social-auth button:hover { background:#fafafa; border-color:#8c8c8c; }
+#auth.flow .google-g { font-family:Arial,sans-serif; font-size:19px; font-weight:800; color:#4285f4; text-shadow:1px 0 #34a853; }
+#auth.flow .apple-mark { color:#050505; font-size:19px; line-height:1; }
+#auth.flow form { margin:0; }
+#auth.flow form label { display:block; font-size:14px; font-weight:400; margin:0 0 6px; }
+#auth.flow input, #auth.flow select, #auth.flow textarea { width:100%; min-height:44px; margin:0 0 16px; padding:10px 13px; border:1px solid #bcbcbc; border-radius:7px; color:#222; background:#fff; font-size:15px; box-shadow:none; }
+#auth.flow input::placeholder { color:#a0a0a0; opacity:1; }
+#auth.flow .primary { width:100%; min-height:44px; margin:4px 0 0; padding:10px 16px; border:1px solid #1d3557; border-radius:7px; color:#fff; background:#1d3557; font-size:15px; font-weight:600; }
+#auth.flow .primary:hover:not(:disabled) { background:#29466c; }
+#auth.flow .legal { margin:15px 0 0; color:#999; font-size:12px; line-height:1.5; }
+#auth.flow .legal a { color:#2f6db5; text-decoration:none; }
+#auth.flow .toggle { margin-top:16px; color:#888; font-size:12px; }
+#auth.flow .toggle button, #auth.flow .link, #auth.flow .inline { color:#2f6db5; font-size:12px; }
+#auth.flow .back-link { margin-top:12px; }
+#auth.flow .msg { margin-top:12px; }
+html:has(#auth:not([hidden])), body:has(#auth:not([hidden])) { background:#fff; }
+@media (max-width: 600px) {
+  #auth.flow { padding:0 20px 28px !important; }
+  #auth.flow .auth-header { height:72px; padding-top:20px; }
+  #auth.flow .auth-logo { font-size:28px; }
+  #auth.flow .auth-content { width:min(100%, 360px); margin-top:clamp(22px, 5vh, 40px); }
+  #auth.flow h1 { font-size:25px; }
+  #auth.flow .sub { font-size:16px; margin-bottom:22px; }
+  #auth.flow .help { font-size:14px; }
+  #auth.flow .social-auth button { font-size:14px; min-height:42px; }
+  #auth.flow input, #auth.flow select, #auth.flow textarea { min-height:43px; margin-bottom:14px; font-size:14px; }
+  #auth.flow .primary { min-height:43px; font-size:14px; }
+}
+@media (max-width: 360px) {
+  #auth.flow { padding-right:16px !important; padding-left:16px !important; }
+  #auth.flow .auth-content { margin-top:20px; }
+  #auth.flow .social-auth button { padding:8px 10px; }
+}
