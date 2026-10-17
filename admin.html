@@ -3,10 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f8fc">
-<meta name="description" content="Orello Admin — manage your workspace, team, projects, and time reports.">
 <title>Orello Admin</title>
-<link rel="stylesheet" href="css/admin.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root { --text:#37352f; --muted:#787774; --line:#ebebea; --hover:#f1f1ef; --soft:#f7f7f5; --side:#fbfbfa; --navy:#1d3557; --blue:#2f6db5; --err:#c4554d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background: #fff; color: var(--text); -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { border: 0; border-radius: 6px; padding: 7px 12px; font-weight: 500; cursor: pointer; background: none; }
+  button:disabled { opacity: .55; cursor: wait; }
+  :focus-visible { outline: 2px solid #5b94d6; outline-offset: 1px; }
+  .primary { background: var(--navy); color: #fff; }
+  .primary:hover:not(:disabled) { background: #27456f; }
+  input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #e3e2e0; border-radius: 6px; background: #fff; margin-bottom: 12px; }
+  input:focus, select:focus, textarea:focus { border-color: #5b94d6; box-shadow: 0 0 0 3px rgba(91,148,214,.18); outline: none; }
+  label { display: block; color: var(--muted); font-size: 12px; font-weight: 500; margin-bottom: 5px; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .ic { width: 17px; height: 17px; flex: none; }
+  .logo { width: 22px; height: 22px; display: grid; place-items: center; background: var(--navy); color: #fff; border-radius: 5px; font-weight: 700; font-size: 12px; flex: none; }
+
+  #app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  aside { background: var(--side); border-right: 1px solid var(--line); padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .brand { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; }
+  .brand:hover { background: var(--hover); }
+  .brand input { margin: 0; border: 0; padding: 2px 4px; background: transparent; font-weight: 600; box-shadow: none !important; }
+  aside select { font-size: 13px; margin: 4px 8px; width: calc(100% - 16px); }
+  .grp { font-size: 11px; font-weight: 600; color: #9b9a97; padding: 18px 10px 4px; }
+  .nav a { display: flex; align-items: center; gap: 9px; padding: 5px 10px; border-radius: 6px; color: #5f5e5b; cursor: pointer; font-weight: 500; }
+  .nav a:hover { background: var(--hover); }
+  .nav a[aria-current="page"] { background: rgba(55,53,47,.08); color: var(--text); }
+  .nav .ic { color: #8b8a87; }
+  .grow { flex: 1; }
+  .signout { text-align: left; color: #5f5e5b; padding: 6px 10px; }
+  .signout:hover { background: var(--hover); }
+  main { padding: 56px 72px 96px; max-width: 960px; width: 100%; margin: 0 auto; }
+
+  h1 { font-size: 30px; font-weight: 700; letter-spacing: -.4px; margin: 0; display: flex; align-items: center; gap: 12px; line-height: 1.2; }
+  h1 .ic { width: 28px; height: 28px; color: var(--navy); }
+  .lede { color: var(--muted); margin: 6px 0 28px; min-height: 21px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 34px 0 10px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; background: #fff; }
+  .callout { background: var(--soft); border-radius: 8px; padding: 14px 16px; color: var(--muted); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #fff; color: var(--text); }
+  .tile:hover { background: var(--soft); }
+  .tile .ic { margin-bottom: 10px; color: #8b8a87; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .stats .card { margin: 0; }
+  .stat-value { font-size: 24px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 6px 12px 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 9px 12px 9px 8px; border-bottom: 1px solid #f1f1ef; vertical-align: middle; overflow-wrap: anywhere; }
+  tbody tr:hover { background: var(--soft); }
+  td select { width: auto; margin: 0; padding: 3px 6px; font-size: 13px; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 12px; background: #f1f1ef; color: #37352f; }
+  .pill.blue { background: #e7f3f8; color: #183347; }
+  .pill.yellow { background: #fbf3db; color: #402c1b; }
+  .pill.green { background: #dbeddb; color: #1c3829; }
+  .empty { color: var(--muted); padding: 8px 0; }
+  .star { padding: 0 4px; color: #d3d2cf; font-size: 16px; line-height: 1; }
+  .star[aria-pressed="true"] { color: #e9a820; }
+  details.new { margin-bottom: 10px; }
+  details.new summary { cursor: pointer; display: inline-block; padding: 5px 10px; border-radius: 6px; font-weight: 500; color: var(--blue); }
+  details.new summary:hover { background: var(--hover); }
+  details.new[open] summary { margin-bottom: 10px; }
+  .proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+  .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .chart-head select { width: auto; margin: 0; padding: 3px 8px; font-size: 13px; }
+  .chart-title { font-weight: 600; }
+  .bars { display: flex; gap: 10px; height: 170px; margin-top: 10px; }
+  .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .barwrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .bar { width: 100%; max-width: 24px; background: #8bb8e8; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .col:hover .bar { background: #5b94d6; }
+  .donut { display: flex; gap: 32px; align-items: center; flex-wrap: wrap; }
+  .legend { list-style: none; margin: 0; padding: 0; }
+  .legend li { padding: 3px 0; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; }
+  .line { width: 100%; height: auto; overflow: visible; margin-top: 8px; }
+  .axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f1ef; }
+  .check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid #c9c8c5; flex: none; }
+  .check.done { background: #3a9b6b; border-color: #3a9b6b; }
+  .steps button { margin-left: auto; color: var(--blue); }
+  .steps button:hover { background: var(--hover); }
+
+  .msg { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 10px 0 0; overflow-wrap: anywhere; }
+  .msg.error { color: var(--err); }
+  .banner { background: #fdf1ef; border: 1px solid #f3c6bf; color: var(--err); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; overflow-wrap: anywhere; }
+  .res { padding: 10px 0; border-top: 1px solid #f1f1ef; overflow-wrap: anywhere; }
+  .res.bad { color: var(--err); }
+  .linkrow { display: flex; gap: 8px; align-items: center; margin: 6px 0 4px; }
+  .linkrow input { margin: 0 !important; font-size: 12px !important; }
+  .linkrow button { flex: none; background: var(--hover); }
+  .btn { display: inline-block; margin: 8px 0 4px; padding: 7px 12px; border-radius: 6px; background: var(--navy); color: #fff; font-weight: 500; text-decoration: none; }
+  main textarea { min-height: 80px; resize: vertical; }
+
+  .flow { max-width: 400px; margin: 9vh auto; }
+  .flow h1 { display: block; font-size: 30px; color: #9b9a97; }
+  .flow .sub { font-size: 20px; font-weight: 600; margin: 4px 0 26px; line-height: 1.3; }
+  .flow .help { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+  .flow label { color: var(--text); font-size: 13px; font-weight: 600; }
+  .flow input, .flow select, .flow textarea { padding: 11px 12px; font-size: 14px; margin-bottom: 18px; }
+  .flow textarea { min-height: 96px; resize: vertical; }
+  .flow .primary { width: 100%; padding: 12px; }
+  .flow .link { color: var(--text); padding: 12px 0; font-weight: 600; }
+  .flow .toggle { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .flow .toggle button { padding: 0; color: var(--blue); font-weight: 600; }
+  .chips { display: flex; gap: 8px; margin-bottom: 18px; }
+  .chips button { flex: 1; border: 1px solid #e3e2e0; color: var(--muted); padding: 10px; }
+  .chips button[aria-pressed="true"] { border-color: var(--navy); color: var(--navy); background: #eef3fb; }
+
+  @media (max-width: 820px) {
+    #app { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    main { padding: 28px 20px 64px; }
+    .proj-grid { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
@@ -31,6 +151,422 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
-<script src="js/admin.js" defer></script>
+<script>
+  // Same Supabase project as the plugin. Publishable key only; never put a service-role key here.
+  const SUPABASE_URL = 'https://hwoxtnctdaarmzjlhsws.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Tq6q2R6_aaD27e9iK_0zHg_JELvKMXB';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = d => d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'None yet';
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const parseEmails = s => [...new Set(s.split(/[\s,;]+/).map(x => x.trim().toLowerCase()).filter(Boolean))];
+  const rand = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(24)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const sha = async t => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)))].map(b => b.toString(16).padStart(2, '0')).join('');
+  const base = () => location.protocol === 'file:' ? location.href.split(/[?#]/)[0] : location.origin + location.pathname;
+  const store = { get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) {} } };
+  const LINK_NOTE = 'Each person is emailed their link automatically. If an email does not arrive, use "Send link" to send it from your own email app, or copy the link. A link only works for the email address it was created for, and expires after 7 days.';
+  const EMPTY = 'No sessions recorded yet. Sessions appear here when team members track time in the plugin.';
+  const P = {
+    search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+    home: '<path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',
+    ai: '<path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+    file: '<path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 010 7M18 14.5c2.2.6 3.5 2.4 3.5 5.5"/>',
+    report: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 12h6M9 16h4"/>',
+    trend: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'
+  };
+  const ic = n => '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + P[n] + '</svg>';
+  const NAV = [['General', [['search', 'Search', 'search'], ['home', 'Home', 'home'], ['ai', 'Orello AI', 'ai'], ['saved', 'Saved', 'star']]],
+    ['Work Space', [['start', 'Get started', 'file'], ['projects', 'Projects', 'layers'], ['team', 'Teams', 'users']]],
+    ['Analytics', [['reports', 'Reports', 'report'], ['trend', 'Trend', 'trend']]]];
+
+  let me = null, myName = '', adminTeams = [], team = null, view = 'home';
+  let members = [], invs = [], projects = [], sessions = [], names = {}, dashLinks = null, dashErr = '', dashBusy = false, projBusy = false, projErr = '', draft = { name: '', desc: '', start: '', target: '' };
+  let ob = { step: 'email', email: '', password: '', name: '', ws: '', purpose: 'Work', err: '', busy: false, links: null, title: '', notice: '' };
+  const urlToken = new URLSearchParams(location.search).get('invite');
+  if (urlToken) store.set('orello-pending-invite', urlToken);
+  const pending = () => store.get('orello-pending-invite');
+
+  // ---------- Sign up, sign in, workspace setup, invites (mirrors the Figma onboarding) ----------
+  function showAuth() { $('app').hidden = true; $('auth').hidden = false; renderAuth(); }
+  function showApp() { $('auth').hidden = true; $('app').hidden = false; }
+
+  function mailto(r) {
+    const body = 'Hi,\n\nYou have been invited to join ' + team.name + ' on Orello. Open this link and create your account (or sign in) with this email address: ' + r.email + '\n\n' + r.link +
+      '\n\nThen open the Orello plugin in Figma and sign in to start tracking.\n\nThe link expires in 7 days.';
+    return 'mailto:' + encodeURIComponent(r.email) + '?subject=' + encodeURIComponent('Join ' + team.name + ' on Orello') + '&body=' + encodeURIComponent(body);
+  }
+  function linksHtml(ls) {
+    return ls.map(r => r.error ? '<div class="res bad">' + esc(r.email) + ': ' + esc(r.error) + '</div>'
+      : '<div class="res">' + esc(r.email) + (r.emailed ? '<p class="msg">Email sent.</p>' : '<p class="msg error">The email was not sent: ' + esc(r.mailError) + ' Use Send link or Copy link instead.</p>') + '<div class="linkrow"><input readonly value="' + esc(r.link) + '" aria-label="Invitation link for ' + esc(r.email) + '"><button type="button" data-copy>Copy link</button></div>' +
+        '<a class="btn" href="' + esc(mailto(r)) + '">Send link</a></div>').join('');
+  }
+
+  function renderAuth() {
+    const o = ob, dis = o.busy ? ' disabled' : '', joining = !!pending();
+    const err = o.err ? '<p class="msg error" role="alert">' + esc(o.err) + '</p>' : '';
+    const wrap = (t, sub, help, inner) => '<h1>' + t + '</h1><div class="sub">' + sub + '</div>' + (help ? '<p class="help">' + help + '</p>' : '') + inner + err;
+    const field = (id, label, type, ph, val, extra) => '<label for="' + id + '">' + label + '</label><input id="' + id + '" name="' + id + '" type="' + type + '" placeholder="' + ph + '" value="' + esc(val) + '" ' + (extra || '') + '>';
+    let h;
+    if (o.step === 'name') h = wrap('Getting started', 'Track productivity, enhance collaboration', 'Your team members will see your name.',
+      '<form data-s="name">' + field('name', 'Name', 'text', 'Enter your name', o.name, 'maxlength="100" autocomplete="name"') + '<button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Creating...' : 'Continue') + '</button></form>');
+    else if (o.step === 'signin') h = wrap('Log in to your account', 'Specifically tailored for design teams', joining ? 'Sign in with the email address your invitation was sent to.' : '',
+      '<form data-s="signin">' + field('email', 'Email', 'email', 'Enter your email', o.email, 'required autocomplete="email"') + field('password', 'Password', 'password', 'Enter your password', '', 'required autocomplete="current-password"') +
+      '<button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Signing in...' : 'Continue') + '</button></form><div class="toggle">New to Orello? <button data-ob="email">Create an account</button></div>');
+    else if (o.step === 'workspace') h = wrap('Set up your workspace', 'Add your team or company name so everyone stays organized.', '',
+      '<form data-s="workspace">' + field('ws', 'Workspace name', 'text', 'Enter your workspace name', o.ws, 'maxlength="120"') + '<label>Purpose</label><div class="chips">' +
+      ['Work', 'Personal', 'Others'].map(p => '<button type="button" data-purpose="' + p + '" aria-pressed="' + (o.purpose === p) + '">' + p + '</button>').join('') + '</div>' +
+      '<button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Creating...' : 'Continue') + '</button></form><p class="help" style="margin-top:14px">Joining someone else\'s team? Open the invitation link they sent you again.</p><button class="link" data-ob="signout">Sign out</button>');
+    else if (o.step === 'invite') h = wrap('Invite your teammates', 'Add your teammates to start tracking productivity and collaborating seamlessly', '',
+      o.links ? '<p class="help">' + LINK_NOTE + '</p>' + linksHtml(o.links) + '<button class="primary" data-ob="dash" style="margin-top:20px">Go to dashboard</button>'
+        : '<form data-s="invite"><label for="emails">Email teammates</label><textarea id="emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea><button class="primary" type="submit"' + dis + '>' + (o.busy ? 'Sending...' : 'Send invites') + '</button></form><button class="link" data-ob="dash">Skip for now</button>');
+    else if (o.step === 'notice') h = wrap(esc(o.title), esc(o.notice), '', '<button class="link" data-ob="signin">Sign in</button> <button class="link" data-ob="signout">Sign out</button>');
+    else h = wrap(joining ? 'Join a team' : 'Create an account', joining ? 'Create your account to accept the invitation' : 'Specifically tailored for design teams',
+      joining ? 'Use the email address your invitation was sent to.' : 'Use an organizational email or your Figma email to track your team members.',
+      '<form data-s="email">' + field('email', 'Email', 'email', 'Enter your organizational email', o.email, 'required autocomplete="email"') + field('password', 'Password', 'password', 'At least 6 characters', '', 'required minlength="6" autocomplete="new-password"') +
+      '<button class="primary" type="submit">Continue</button></form><div class="toggle">Already have an account? <button data-ob="signin">Sign in</button></div>');
+    $('auth').innerHTML = h;
+  }
+
+  $('auth').addEventListener('submit', async e => {
+    const f = e.target.closest('form[data-s]'); if (!f) return;
+    e.preventDefault();
+    const v = n => f.elements[n]?.value ?? '';
+    ob.err = '';
+    switch (f.dataset.s) {
+      case 'email': { const em = v('email').trim().toLowerCase();
+        if (!EMAIL_RE.test(em)) ob.err = 'Enter a valid email address.';
+        else if (v('password').length < 6) ob.err = 'Use a password of at least 6 characters.';
+        else { ob.email = em; ob.password = v('password'); ob.step = 'name'; } break; }
+      case 'name': ob.name = v('name').trim(); await signUp(); return;
+      case 'signin': ob.email = v('email').trim().toLowerCase(); await signIn(ob.email, v('password')); return;
+      case 'workspace': ob.ws = v('ws').trim(); if (!ob.ws) ob.err = 'Enter a workspace name.'; else { await makeTeam(); return; } break;
+      case 'invite': await sendInvites(v('emails')); return;
+    }
+    renderAuth();
+  });
+
+  $('auth').addEventListener('click', async e => {
+    const p = e.target.closest('[data-purpose]');
+    if (p) { const w = $('auth').querySelector('[name=ws]'); if (w) ob.ws = w.value; ob.purpose = p.dataset.purpose; renderAuth(); return; }
+    const b = e.target.closest('[data-ob]'); if (!b) return;
+    ob.err = '';
+    if (b.dataset.ob === 'signout') { await doSignOut(); return; }
+    if (b.dataset.ob === 'dash') { await enterApp(); return; }
+    ob.step = b.dataset.ob; renderAuth();
+  });
+
+  async function signUp() {
+    ob.busy = true; renderAuth();
+    const { data, error } = await db.auth.signUp({ email: ob.email, password: ob.password, options: { data: ob.name ? { display_name: ob.name } : {}, emailRedirectTo: base() } });
+    ob.busy = false; ob.password = '';
+    if (error || data.user?.identities?.length === 0) { ob.err = error ? error.message : 'This email already has an account. Sign in instead.'; ob.step = 'email'; renderAuth(); return; }
+    if (data.session) { await afterAuth(); return; }
+    Object.assign(ob, { step: 'notice', title: 'Check your email', notice: 'We sent a confirmation link to ' + ob.email + '. Confirm your email, then sign in' + (pending() ? ' (open your invitation link again if you land back here).' : '.') });
+    renderAuth();
+  }
+
+  async function signIn(email, password) {
+    ob.busy = true; renderAuth();
+    const { error } = await db.auth.signInWithPassword({ email, password });
+    ob.busy = false;
+    if (error) { ob.err = error.message; ob.step = 'signin'; renderAuth(); return; }
+    await afterAuth();
+  }
+
+  async function afterAuth() {
+    const { data: u } = await db.auth.getUser(); me = u.user;
+    let joined = false;
+    const tok = pending();
+    if (tok) {
+      const { error } = await db.rpc('accept_team_invitation', { invitation_token: tok });
+      store.set('orello-pending-invite', null); history.replaceState(null, '', location.pathname);
+      if (error) { Object.assign(ob, { step: 'notice', title: 'Invitation problem', notice: error.message + '. Ask the person who invited you for a new link, and sign in with the email it was sent to.' }); showAuth(); return; }
+      joined = true;
+    }
+    const { data, error } = await db.from('team_members').select('role, teams(id, name)').eq('user_id', me.id);
+    if (error) { Object.assign(ob, { step: 'notice', title: 'Something went wrong', notice: error.message }); showAuth(); return; }
+    adminTeams = (data || []).filter(r => r.role !== 'member' && r.teams).map(r => ({ id: r.teams.id, name: r.teams.name }));
+    if (adminTeams.length) { team = adminTeams[0]; await enterApp(); return; }
+    if ((data || []).length) { Object.assign(ob, { step: 'notice', title: joined ? 'You have joined the team' : 'You are a team member', notice: 'Open Orello in Figma and sign in with ' + me.email + ' to start tracking. The dashboard is for team owners and admins.' }); showAuth(); return; }
+    ob.step = 'workspace'; showAuth();
+  }
+
+  async function makeTeam() {
+    ob.busy = true; renderAuth();
+    const { data, error } = await db.rpc('create_team', { team_name: ob.ws });
+    if (error) { ob.busy = false; ob.err = error.message; renderAuth(); return; }
+    await db.auth.updateUser({ data: { workspace_purpose: ob.purpose } });
+    ob.busy = false; team = { id: data.id, name: data.name }; adminTeams = [team]; ob.step = 'invite'; ob.links = null; renderAuth();
+  }
+
+  async function createInvites(emails) {
+    const out = [];
+    for (const email of emails) {
+      const t = rand();
+      const { data, error } = await db.from('project_invitations').insert({ team_id: team.id, email, role: 'member', invited_by: me.id, token_hash: await sha(t) }).select('id').single();
+      if (error) { out.push({ email, error: error.message }); continue; }
+      const r = { email, link: base() + '?invite=' + t };
+      // The send-invite Edge Function emails the link (it checks that this admin owns the invitation).
+      const { error: mailErr } = await db.functions.invoke('send-invite', { body: { invitationId: data.id, token: t } });
+      if (mailErr) { let m = ''; try { m = (await mailErr.context.json()).error || ''; } catch (_) {} r.mailError = m || mailErr.message; } else r.emailed = true;
+      out.push(r);
+    }
+    return out;
+  }
+  const checkEmails = list => !list.length ? 'Enter at least one email address.' : list.some(x => !EMAIL_RE.test(x)) ? 'Check the email addresses: ' + list.filter(x => !EMAIL_RE.test(x)).join(', ') : list.length > 20 ? 'Invite up to 20 people at a time.' : '';
+
+  async function sendInvites(raw) {
+    const list = parseEmails(raw), bad = checkEmails(list);
+    if (bad) { ob.err = bad; renderAuth(); return; }
+    ob.busy = true; renderAuth(); ob.links = await createInvites(list); ob.busy = false; renderAuth();
+  }
+
+  async function doSignOut() {
+    await db.auth.signOut();
+    me = null; team = null; adminTeams = []; dashLinks = null; view = 'home';
+    ob = { step: 'signin', email: '', password: '', name: '', ws: '', purpose: 'Work', err: '', busy: false, links: null, title: '', notice: '' };
+    showAuth();
+  }
+  $('signout').addEventListener('click', doSignOut);
+
+  // ---------- Dashboard (owners and admins; everything is limited by Supabase row level security) ----------
+  let saved = new Set((() => { try { return JSON.parse(store.get('orello-saved-projects') || '[]'); } catch (_) { return []; } })());
+  let year = new Date().getFullYear(), query = '';
+  const COLORS = ['#5b94d6', '#c8a3f2', '#b8e36a', '#e08a8a', '#f4dd9c', '#7fd1c7', '#f0b27a'];
+  const STATUS = { Planning: '', 'In progress': 'blue', Completed: 'green' };
+  const banner = t => { $('banner').hidden = !t; $('banner').textContent = t || ''; };
+  const hrs = s => (s / 3600).toFixed(1);
+  const secs = l => l.reduce((a, s) => a + s.duration_seconds, 0);
+  const nm = id => names[id] || 'Member ' + String(id).slice(0, 6);
+  const head = (icon, title, sub) => '<h1>' + ic(icon) + esc(title) + '</h1><p class="lede">' + (sub || '') + '</p>';
+  const stat = (l, v) => '<div class="card"><div class="muted">' + l + '</div><div class="stat-value">' + v + '</div></div>';
+  const table = (cols, rows, empty) => rows.length ? '<div class="table-wrap"><table><thead><tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' : '<div class="empty">' + empty + '</div>';
+  const pill = (c, t) => '<span class="pill' + (c ? ' ' + c : '') + '">' + t + '</span>';
+  const projSecs = p => secs(sessions.filter(s => s.project_id === p.id));
+  const projPeople = p => new Set(sessions.filter(s => s.project_id === p.id).map(s => s.user_id)).size;
+
+  function bars() {
+    const years = [...new Set(sessions.map(s => new Date(s.completed_at).getFullYear()).concat(new Date().getFullYear()))].sort((a, b) => b - a);
+    const c = Array(12).fill(0);
+    sessions.forEach(s => { const d = new Date(s.completed_at); if (d.getFullYear() === year) c[d.getMonth()] += s.duration_seconds / 3600; });
+    const m = Math.max(...c, 0.0001);
+    return '<div class="card"><div class="chart-head"><span class="chart-title">Total work hours</span><select data-year aria-label="Year">' + years.map(y => '<option' + (y === year ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></div>' +
+      (sessions.length ? '<div class="bars">' + c.map((n, i) => '<div class="col" title="' + MONTHS[i] + ': ' + n.toFixed(1) + ' hours"><div class="barwrap"><div class="bar" style="height:' + (n / m * 100) + '%"></div></div><span>' + MONTHS[i] + '</span></div>').join('') + '</div>' : '<div class="empty">' + EMPTY + '</div>') + '</div>';
+  }
+
+  function donut() {
+    const rows = projects.map(p => ({ name: p.name, v: projSecs(p) })).filter(r => r.v > 0), total = rows.reduce((a, r) => a + r.v, 0);
+    if (!total) return '<div class="card"><div class="chart-title">Hours by project</div><div class="empty">' + EMPTY + '</div></div>';
+    const R = 42, C = 2 * Math.PI * R; let off = 0;
+    const arcs = rows.map((r, i) => { const len = r.v / total * C, a = '<circle r="' + R + '" cx="60" cy="60" fill="none" stroke="' + COLORS[i % COLORS.length] + '" stroke-width="18" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '"/>'; off += len; return a; }).join('');
+    return '<div class="card"><div class="chart-title" style="margin-bottom:12px">Hours by project</div><div class="donut"><svg viewBox="0 0 120 120" width="170" height="170" role="img" aria-label="Hours by project"><g transform="rotate(-90 60 60)">' + arcs + '</g></svg><ul class="legend">' +
+      rows.map((r, i) => '<li><span class="dot" style="background:' + COLORS[i % COLORS.length] + '"></span>' + esc(r.name) + ' <span class="muted">' + hrs(r.v) + ' h, ' + Math.round(r.v / total * 100) + '%</span></li>').join('') + '</ul></div></div>';
+  }
+
+  function trend(n) {
+    const ds = Array.from({ length: n }, (_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (n - 1 - i)); return d; });
+    const h = ds.map(() => 0), who = ds.map(() => new Set());
+    sessions.forEach(s => { const d = new Date(s.completed_at); d.setHours(0, 0, 0, 0); const i = Math.round((d - ds[0]) / 864e5); if (i >= 0 && i < n) { h[i] += s.duration_seconds / 3600; who[i].add(s.user_id); } });
+    return { labels: ds.map(d => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })), hours: h, members: who.map(x => x.size) };
+  }
+  function line(title, vals, labels, unit) {
+    const W = 640, H = 150, m = Math.max(...vals, 0.0001), step = W / Math.max(vals.length - 1, 1), y = v => (H - v / m * (H - 10) - 2).toFixed(1);
+    return '<div class="card"><div class="chart-title">' + title + '</div>' + (sessions.length
+      ? '<svg class="line" viewBox="0 0 ' + W + ' ' + (H + 4) + '" role="img" aria-label="' + title + '"><polyline fill="none" stroke="#5b94d6" stroke-width="2" points="' + vals.map((v, i) => (i * step).toFixed(1) + ',' + y(v)).join(' ') + '"/>' +
+        vals.map((v, i) => '<circle cx="' + (i * step).toFixed(1) + '" cy="' + y(v) + '" r="3" fill="#5b94d6"><title>' + labels[i] + ': ' + v.toFixed(1) + ' ' + unit + '</title></circle>').join('') + '</svg><div class="axis"><span>' + labels[0] + '</span><span>Highest: ' + m.toFixed(1) + ' ' + unit + '</span><span>' + labels[labels.length - 1] + '</span></div>'
+      : '<div class="empty">' + EMPTY + '</div>') + '</div>';
+  }
+
+  async function enterApp() {
+    showApp();
+    $('who').textContent = me.email;
+    const sel = $('teamsel'); sel.hidden = adminTeams.length < 2;
+    sel.innerHTML = adminTeams.map(t => '<option value="' + esc(t.id) + '"' + (t.id === team.id ? ' selected' : '') + '>' + esc(t.name) + '</option>').join('');
+    await loadTeam();
+  }
+
+  async function loadTeam() {
+    banner('');
+    const id = team.id;
+    const [m, i, p] = await Promise.all([
+      db.from('team_members').select('user_id, role, joined_at').eq('team_id', id).order('joined_at'),
+      db.from('project_invitations').select('id, email, role, expires_at, accepted_at, created_at').eq('team_id', id).order('created_at', { ascending: false }),
+      db.from('projects').select('id, name, description, status, start_date, target_date').eq('team_id', id).order('created_at', { ascending: false })
+    ]);
+    members = m.data || []; invs = i.data || []; projects = p.data || [];
+    const pids = projects.map(x => x.id);
+    const [s, pr] = await Promise.all([
+      pids.length ? db.from('time_sessions').select('project_id, user_id, duration_seconds, started_at, completed_at').in('project_id', pids) : { data: [] },
+      members.length ? db.from('profiles').select('id, display_name').in('id', members.map(x => x.user_id)) : { data: [] }
+    ]);
+    sessions = s.data || []; names = Object.fromEntries((pr.data || []).map(x => [x.id, x.display_name]));
+    myName = names[me.id] || (me.email || '').split('@')[0];
+    const errs = [m, i, p, s, pr].filter(r => r.error).map(r => r.error.message);
+    if (errs.length) banner('Could not load some data: ' + errs.join('; '));
+    render();
+  }
+
+  const projRow = p => '<tr><td>' + esc(p.name) + '</td><td>' + pill(STATUS[p.status] || '', esc(p.status)) + '</td><td>' + projPeople(p) + '</td><td>' + hrs(projSecs(p)) + '</td><td>' + fmt(p.start_date) + '</td></tr>';
+
+  function renderHome() {
+    const go = (v, i, l, d) => '<button class="tile" data-go="' + v + '">' + ic(i) + '<b>' + l + '</b><span class="muted">' + d + '</span></button>';
+    const act = members.map(m => { const ss = sessions.filter(s => s.user_id === m.user_id), last = ss.map(s => s.completed_at).sort().pop();
+      return '<tr><td>' + esc(nm(m.user_id)) + '</td><td>' + esc(m.role) + '</td><td>' + ss.length + '</td><td>' + hrs(secs(ss)) + '</td><td>' + fmt(last) + '</td></tr>'; });
+    return head('home', 'Welcome, ' + myName, 'Your team has tracked ' + hrs(secs(sessions)) + ' hours across ' + projects.length + ' project' + (projects.length === 1 ? '' : 's') + '.') +
+      '<div class="tiles">' + go('team', 'users', 'Invite teammates', 'Send join links') + go('projects', 'layers', 'New project', 'Create and share') + go('reports', 'report', 'View reports', 'Hours and projects') + go('start', 'file', 'Get started', 'Setup checklist') + '</div>' +
+      '<h2>Current projects</h2>' + table(['Project', 'Status', 'Members', 'Hours', 'Start date'], projects.slice(0, 5).map(projRow), 'No projects yet. Create one on the Projects page.') +
+      '<h2>Team activity</h2>' + table(['Member', 'Role', 'Sessions', 'Hours', 'Last session'], act, 'No members yet.');
+  }
+
+  function renderSearch() {
+    const q = query.trim().toLowerCase();
+    let out = '<div class="empty">Type to search.</div>';
+    if (q) {
+      const ps = projects.filter(p => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
+      const ms = members.filter(m => nm(m.user_id).toLowerCase().includes(q));
+      out = (ps.length ? '<h2>Projects</h2>' + table(['Project', 'Status', 'Members', 'Hours', 'Start date'], ps.map(projRow)) : '') +
+        (ms.length ? '<h2>Teammates</h2>' + table(['Name', 'Role'], ms.map(m => '<tr><td>' + esc(nm(m.user_id)) + '</td><td>' + esc(m.role) + '</td></tr>')) : '') +
+        (ps.length || ms.length ? '' : '<div class="empty">No results for "' + esc(query.trim()) + '".</div>');
+    }
+    return head('search', 'Search', 'Find projects and teammates.') + '<input id="q" type="search" placeholder="Search projects and teammates" value="' + esc(query) + '" aria-label="Search">' + out;
+  }
+
+  function renderSaved() {
+    const list = projects.filter(p => saved.has(p.id));
+    return head('star', 'Saved', 'Projects you starred on this browser.') + table(['Project', 'Status', 'Members', 'Hours', 'Start date'], list.map(projRow), 'You do not have any saved projects yet. Star a project on the Projects page.');
+  }
+
+  function renderStart() {
+    const steps = [['Create your workspace', true, ''], ['Invite your teammates', members.length > 1 || invs.length > 0, 'team'], ['Create your first project', projects.length > 0, 'projects'], ['Track time in the Orello plugin in Figma', sessions.length > 0, ''], ['Review your reports', false, 'reports']];
+    return head('file', 'Get started', 'A quick checklist for ' + esc(team.name) + '.') + '<ol class="steps">' +
+      steps.map(([t, done, go]) => '<li><span class="check' + (done ? ' done' : '') + '" role="img" aria-label="' + (done ? 'Done' : 'Not done') + '"></span>' + t + (go ? '<button data-go="' + go + '">Open</button>' : '') + '</li>').join('') + '</ol>';
+  }
+
+  function renderProjects() {
+    const dis = projBusy ? ' disabled' : '';
+    const status = p => '<select data-status="' + esc(p.id) + '" aria-label="Status of ' + esc(p.name) + '">' + ['Planning', 'In progress', 'Completed'].map(o => '<option' + (p.status === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
+    return head('layers', 'Projects', 'Everyone on the team sees new projects in the plugin.') +
+      '<details class="new"' + (projErr || projBusy ? ' open' : '') + '><summary>+ New project</summary><div class="card"><form id="proj-form">' +
+      '<label for="pname">Project name</label><input id="pname" name="pname" maxlength="100" placeholder="e.g. Website redesign" value="' + esc(draft.name) + '">' +
+      '<label for="pdesc">Description</label><textarea id="pdesc" name="pdesc" maxlength="500" placeholder="What is this team working on?">' + esc(draft.desc) + '</textarea>' +
+      '<div class="proj-grid"><div><label for="pstart">Start date</label><input id="pstart" name="pstart" type="date" value="' + esc(draft.start) + '"></div><div><label for="ptarget">Target date</label><input id="ptarget" name="ptarget" type="date" value="' + esc(draft.target) + '"></div></div>' +
+      '<button class="primary" type="submit"' + dis + '>' + (projBusy ? 'Creating...' : 'Create project') + '</button></form>' + (projErr ? '<p class="msg error" role="alert">' + esc(projErr) + '</p>' : '') + '</div></details>' +
+      table(['', 'Project', 'Status', 'Start', 'Target', 'Hours'], projects.map(p => '<tr><td><button class="star" data-star="' + esc(p.id) + '" aria-pressed="' + saved.has(p.id) + '" aria-label="Save ' + esc(p.name) + '">' + (saved.has(p.id) ? '\u2605' : '\u2606') + '</button></td><td>' + esc(p.name) + '</td><td>' + status(p) + '</td><td>' + fmt(p.start_date) + '</td><td>' + fmt(p.target_date) + '</td><td>' + hrs(projSecs(p)) + '</td></tr>'), 'No projects yet. Create one above.');
+  }
+
+  function renderTeam() {
+    const now = Date.now();
+    const st = i => i.accepted_at ? pill('green', 'Accepted') : new Date(i.expires_at) < now ? pill('', 'Expired') : pill('yellow', 'Pending');
+    return head('users', 'Teams', 'Members and invitations for ' + esc(team.name) + '.') + '<h2>Members</h2>' +
+      table(['Name', 'Role', 'Joined'], members.map(m => '<tr><td>' + esc(nm(m.user_id)) + '</td><td>' + esc(m.role) + '</td><td>' + fmt(m.joined_at) + '</td></tr>'), 'No members yet.') +
+      '<h2>Invite teammates</h2><div class="card"><form id="inv-form"><label for="inv-emails">Teammate emails</label><textarea id="inv-emails" name="emails" placeholder="Enter email addresses (separate multiple emails with commas)"></textarea>' +
+      '<button class="primary" type="submit"' + (dashBusy ? ' disabled' : '') + '>' + (dashBusy ? 'Sending...' : 'Send invites') + '</button></form>' +
+      (dashErr ? '<p class="msg error" role="alert">' + esc(dashErr) + '</p>' : '') + '<p class="muted" style="margin-top:10px">' + LINK_NOTE + '</p>' + (dashLinks ? linksHtml(dashLinks) : '') + '</div>' +
+      '<h2>Invitations</h2>' + table(['Email', 'Role', 'Sent', 'Expires', 'Status'], invs.map(i => '<tr><td>' + esc(i.email) + '</td><td>' + esc(i.role) + '</td><td>' + fmt(i.created_at) + '</td><td>' + fmt(i.expires_at) + '</td><td>' + st(i) + '</td></tr>'), 'No invitations yet.');
+  }
+
+  function peakHour() {
+    const h = Array(24).fill(0);
+    sessions.forEach(s => { h[new Date(s.started_at || s.completed_at).getHours()] += s.duration_seconds; });
+    const m = Math.max(...h); if (!m) return 'None yet';
+    const i = h.indexOf(m); return ((i % 12) || 12) + ':00 ' + (i < 12 ? 'AM' : 'PM');
+  }
+
+  function renderReports() {
+    const active = new Set(sessions.filter(s => Date.now() - new Date(s.completed_at) < 30 * 864e5).map(s => s.user_id)).size;
+    return head('report', 'General Reports', 'Usage overview for ' + esc(team.name) + '. These are descriptive totals from recorded sessions, not a measure of anyone\'s productivity.') +
+      '<div class="stats">' + stat('Total projects', projects.length) + stat('Total work hours', hrs(secs(sessions))) + stat('Busiest hour (your time)', peakHour()) + stat('Active members (30 days)', active) + '</div>' +
+      '<h2>All project breakdown</h2>' + table(['Project', 'Members', 'Start date', 'Hours', 'Status'], projects.map(p => '<tr><td>' + esc(p.name) + '</td><td>' + projPeople(p) + '</td><td>' + fmt(p.start_date) + '</td><td>' + hrs(projSecs(p)) + '</td><td>' + pill(STATUS[p.status] || '', esc(p.status)) + '</td></tr>'), 'No projects yet.') +
+      '<h2>Work hours</h2>' + donut() + bars();
+  }
+
+  function renderTrend() {
+    const t = trend(30);
+    return head('trend', 'Trend', 'The last 30 days of recorded sessions.') + line('Hours tracked per day', t.hours, t.labels, 'h') + line('Members who tracked time each day', t.members, t.labels, 'members');
+  }
+
+  function renderAi() {
+    return head('ai', 'Orello AI', 'Ask questions about your team\'s work.') + '<div class="callout"><b>Coming soon.</b> Orello AI is not available yet.</div>';
+  }
+
+  function render() {
+    document.title = team.name + ' - Orello';
+    if (document.activeElement !== $('workspace')) $('workspace').value = team.name;
+    $('nav').innerHTML = NAV.map(([g, items]) => '<div class="grp">' + g + '</div>' + items.map(([k, l, i]) => '<a data-view="' + k + '" tabindex="0"' + (k === view ? ' aria-current="page"' : '') + '>' + ic(i) + l + '</a>').join('')).join('');
+    const views = { search: renderSearch, home: renderHome, ai: renderAi, saved: renderSaved, start: renderStart, projects: renderProjects, team: renderTeam, reports: renderReports, trend: renderTrend };
+    $('view').innerHTML = (views[view] || renderHome)();
+  }
+
+  const navTo = el => { const t = el.closest('[data-view],[data-go]'); if (t) { view = t.dataset.view || t.dataset.go; render(); window.scrollTo(0, 0); if (view === 'search') $('q').focus(); } };
+  $('nav').addEventListener('click', e => navTo(e.target));
+  $('nav').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navTo(e.target); } });
+  $('view').addEventListener('click', e => navTo(e.target));
+  $('view').addEventListener('submit', async e => {
+    if (e.target.id === 'proj-form') { e.preventDefault(); await createProject(e.target); return; }
+    if (e.target.id !== 'inv-form') return;
+    e.preventDefault();
+    const list = parseEmails(e.target.elements.emails.value), bad = checkEmails(list);
+    dashErr = bad; if (bad) { render(); return; }
+    dashBusy = true; render();
+    dashLinks = await createInvites(list); dashBusy = false;
+    await loadTeam();
+  });
+  async function createProject(f) {
+    const v = n => f.elements[n].value.trim();
+    draft = { name: v('pname'), desc: v('pdesc'), start: v('pstart'), target: v('ptarget') };
+    projErr = !draft.name ? 'Enter a project name.'
+      : projects.some(p => p.name.toLowerCase() === draft.name.toLowerCase()) ? 'A project with this name already exists.'
+      : draft.start && draft.target && draft.target < draft.start ? 'Target date cannot be before the start date.' : '';
+    if (projErr) { render(); return; }
+    projBusy = true; render();
+    const { error } = await db.from('projects').insert({ team_id: team.id, name: draft.name, description: draft.desc, start_date: draft.start || null, target_date: draft.target || null, status: 'Planning', created_by: me.id });
+    projBusy = false; projErr = error ? 'Could not create the project: ' + error.message : '';
+    if (!error) draft = { name: '', desc: '', start: '', target: '' };
+    await loadTeam();
+  }
+  $('view').addEventListener('change', async e => {
+    const yr = e.target.closest('[data-year]'); if (yr) { year = +yr.value; render(); return; }
+    const sel = e.target.closest('[data-status]'); if (!sel) return;
+    const { error } = await db.from('projects').update({ status: sel.value }).eq('id', sel.dataset.status);
+    await loadTeam();
+    if (error) banner('Could not update the project: ' + error.message);
+  });
+  $('view').addEventListener('input', e => {
+    if (e.target.id !== 'q') return;
+    const p = e.target.selectionStart; query = e.target.value; render();
+    const n = $('q'); n.focus(); n.setSelectionRange(p, p);
+  });
+  $('view').addEventListener('click', e => {
+    const b = e.target.closest('[data-star]'); if (!b) return;
+    saved.has(b.dataset.star) ? saved.delete(b.dataset.star) : saved.add(b.dataset.star);
+    store.set('orello-saved-projects', JSON.stringify([...saved])); render();
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-copy]'); if (!b) return;
+    const inp = b.closest('.linkrow').querySelector('input'); inp.select();
+    if (navigator.clipboard) navigator.clipboard.writeText(inp.value).catch(() => {});
+    b.textContent = 'Copied';
+  });
+  $('workspace').addEventListener('change', async e => {
+    const name = e.target.value.trim();
+    if (!name || name === team.name) { e.target.value = team.name; return; }
+    const { error } = await db.from('teams').update({ name }).eq('id', team.id);
+    if (error) { banner('Could not rename the workspace: ' + error.message); e.target.value = team.name; return; }
+    team.name = name; const a = adminTeams.find(t => t.id === team.id); if (a) a.name = name;
+    await enterApp();
+  });
+  $('teamsel').addEventListener('change', async e => { team = adminTeams.find(t => t.id === e.target.value) || team; await enterApp(); });
+
+  (async () => {
+    const { data } = await db.auth.getSession();
+    if (data.session) await afterAuth(); else showAuth();
+  })();
+</script>
 </body>
 </html>
